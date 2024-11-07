@@ -1,5 +1,8 @@
 import type { Lists } from '.keystone/types'
 import {User} from "./schemas/User";
+import {Location} from "./schemas/Location"
+import {Project} from "./schemas/Project"
+import {Portfolio} from "./schemas/Portfolio";
 
 export type Session = {
     itemId: string
@@ -9,5 +12,8 @@ export type Session = {
 }
 
 export const lists = {
-    User
+    User,
+    Location,
+    Project,
+    Portfolio
 } satisfies Lists

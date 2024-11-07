@@ -33,11 +33,11 @@ export default withAuth<TypeInfo<Session>>(
         },
         lists,
         ui: {
-            isAccessAllowed: ()=> true,
+            //isAccessAllowed: ()=> true,
             // only admins can view the AdminUI
-            // isAccessAllowed: (context) => {
-            //     return context.session?.data?.isAdmin ?? false
-            // },
+            isAccessAllowed: (context) => {
+                return context.session?.data?.isAdmin ?? false
+            },
         },
         // you can find out more at https://keystonejs.com/docs/apis/session#session-api
         session: statelessSessions(sessionConfig)

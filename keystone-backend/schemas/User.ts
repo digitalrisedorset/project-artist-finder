@@ -1,37 +1,15 @@
 import {list} from "@keystone-6/core";
 import {allowAll, denyAll} from "@keystone-6/core/access";
-import {password, text, checkbox, select} from "@keystone-6/core/fields";
+import {password, text, checkbox, relationship, select} from "@keystone-6/core/fields";
 import type {Session} from "../schema";
 import {skillFields} from "./Skill";
 
-export function hasSession ({ session }: { session?: Session }) {
-    return Boolean(session)
-}
-
-export function isAdminOrSameUser ({ session, item }: { session?: Session, item: Lists.User.Item }) {
+export function isAdminOrSameUser ({ session, item }: { session?: Session }) {
     // you need to have a session to do this
     if (!session) return false
 
     // admins can do anything
     if (session.data.isAdmin) return true
-
-    // the authenticated user needs to be equal to the user we are updating
-    return session.itemId === item.id
-}
-
-export function isAdminOrSameUserFilter ({ session }: { session?: Session }) {
-    // you need to have a session to do this
-    if (!session) return false
-
-    // admins can see everything
-    if (session.data?.isAdmin) return {}
-
-    // the authenticated user can only see themselves
-    return {
-        id: {
-            equals: session.itemId,
-        },
-    }
 }
 
 export function isAdmin ({ session }: { session?: Session }) {
@@ -49,7 +27,7 @@ export const User = list({
     access: allowAll,
     ui: {
         listView: {
-            initialColumns: ['name', 'email', 'role'],
+            initialColumns: ['name', 'email', 'type', 'speciality', 'activePortfolio'],
         },
     },
     fields: {
@@ -115,6 +93,19 @@ export const User = list({
                 { label: 'Sculptor', value: 'sculptor' },
                 { label: 'Wood Maker', value: 'wood_worker' },
             ],
+        }),
+        locations: relationship({
+            ref: 'Location.assignedTo',
+        }),
+        projectsAssigned: relationship({
+            ref: 'Project.members',
+            many: true,
+            ui: {
+                itemView: { fieldMode: 'read' },
+            },
+        }),
+        activePortfolio: relationship({
+            ref: 'Portfolio.owner',
         }),
         // a flag to indicate if this user is an admin
         //  should not be publicly visible
