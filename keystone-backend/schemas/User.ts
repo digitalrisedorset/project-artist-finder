@@ -1,6 +1,49 @@
 import {list} from "@keystone-6/core";
 import {allowAll, denyAll} from "@keystone-6/core/access";
 import {password, text, checkbox, select} from "@keystone-6/core/fields";
+import type {Session} from "../schema";
+import {skillFields} from "./Skill";
+
+export function hasSession ({ session }: { session?: Session }) {
+    return Boolean(session)
+}
+
+export function isAdminOrSameUser ({ session, item }: { session?: Session, item: Lists.User.Item }) {
+    // you need to have a session to do this
+    if (!session) return false
+
+    // admins can do anything
+    if (session.data.isAdmin) return true
+
+    // the authenticated user needs to be equal to the user we are updating
+    return session.itemId === item.id
+}
+
+export function isAdminOrSameUserFilter ({ session }: { session?: Session }) {
+    // you need to have a session to do this
+    if (!session) return false
+
+    // admins can see everything
+    if (session.data?.isAdmin) return {}
+
+    // the authenticated user can only see themselves
+    return {
+        id: {
+            equals: session.itemId,
+        },
+    }
+}
+
+export function isAdmin ({ session }: { session?: Session }) {
+    // you need to have a session to do this
+    if (!session) return false
+
+    // admins can do anything
+    if (session.data.isAdmin) return true
+
+    // otherwise, no
+    return false
+}
 
 export const User = list({
     access: allowAll,
@@ -13,10 +56,10 @@ export const User = list({
         name: text({
             access: {
                 // only the respective user, or an admin can read this field
-                read: allowAll,
+                read: isAdminOrSameUser,
 
                 // only admins can update this field
-                update: allowAll,
+                update: isAdmin,
             },
             isFilterable: false,
             isOrderable: false
@@ -24,10 +67,10 @@ export const User = list({
         email: text({
             access: {
                 // only the respective user, or an admin can read this field
-                read: allowAll,
+                read: isAdminOrSameUser,
 
                 // only admins can update this field
-                update: allowAll,
+                update: isAdmin,
             },
             isFilterable: false,
             isOrderable: false,
@@ -41,7 +84,7 @@ export const User = list({
         password: password({
             access: {
                 read: denyAll, // TODO: is this required?
-                update: allowAll,
+                update: isAdminOrSameUser,
             },
             validation: {
                 isRequired: true,
@@ -49,19 +92,28 @@ export const User = list({
             ui: {
                 itemView: {
                     // don't show this field if it isn't relevant
-                    fieldMode: 'hidden',
+                    fieldMode: args => (isAdminOrSameUser(args) ? 'edit' : 'hidden'),
                 },
                 listView: {
                     fieldMode: 'hidden', // TODO: is this required?
                 },
             },
         }),
+        ...skillFields,
         type: select({
             type: 'enum',
             options: [
                 { label: 'Admin', value: 'admin' },
-                { label: 'Manager', value: 'manager' },
-                { label: 'Staff', value: 'staff' },
+                { label: 'Artist', value: 'artist' },
+                { label: 'Volunteer', value: 'volunteer' },
+            ],
+        }),
+        speciality: select({
+            type: 'enum',
+            options: [
+                { label: 'Painter', value: 'painter' },
+                { label: 'Sculptor', value: 'sculptor' },
+                { label: 'Wood Maker', value: 'wood_worker' },
             ],
         }),
         // a flag to indicate if this user is an admin
@@ -69,20 +121,20 @@ export const User = list({
         isAdmin: checkbox({
             access: {
                 // only the respective user, or an admin can read this field
-                read: false,
+                read: isAdminOrSameUser,
 
                 // only admins can create, or update this field
-                create: false,
-                update: false,
+                create: isAdmin,
+                update: isAdmin,
             },
             defaultValue: false,
             ui: {
                 // only admins can edit this field
                 createView: {
-                    fieldMode: args => 'hidden',
+                    fieldMode: args => (isAdmin(args) ? 'edit' : 'hidden'),
                 },
                 itemView: {
-                    fieldMode: args => 'read',
+                    fieldMode: args => (isAdmin(args) ? 'edit' : 'read'),
                 },
             },
         })
