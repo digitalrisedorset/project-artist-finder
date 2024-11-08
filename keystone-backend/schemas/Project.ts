@@ -83,5 +83,9 @@ export const Project = list({
             ref: 'Portfolio.projectsAssigned',
             many: true,
         }),
+        mediasAssigned: relationship({
+            ref: 'MediaAsset.project',
+            many: true,
+        }),
     },
 });

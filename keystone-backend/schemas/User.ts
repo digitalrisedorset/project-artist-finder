@@ -3,6 +3,7 @@ import {allowAll, denyAll} from "@keystone-6/core/access";
 import {password, text, checkbox, relationship, select} from "@keystone-6/core/fields";
 import type {Session} from "../schema";
 import {skillFields} from "./Skill";
+import {ProjectSubscription} from "./ProjectSubscription";
 
 export function isAdminOrSameUser ({ session, item }: { session?: Session }) {
     // you need to have a session to do this
@@ -106,6 +107,10 @@ export const User = list({
         }),
         activePortfolio: relationship({
             ref: 'Portfolio.owner',
+        }),
+        ProjectSubscriptions: relationship({
+            ref: 'ProjectSubscription.member',
+            many: true,
         }),
         // a flag to indicate if this user is an admin
         //  should not be publicly visible
