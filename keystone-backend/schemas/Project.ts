@@ -19,11 +19,22 @@ export const Project = list({
                 // only admins can update this field
                 update: isAdmin,
             },
-            isFilterable: false,
+            isFilterable: true,
             isOrderable: false,
             validation: {
                 isRequired: true,
             },
+        }),
+        description:  text({
+            access: {
+                // only the respective user, or an admin can read this field
+                read: isAdminOrSameUser,
+
+                // only admins can update this field
+                update: isAdmin,
+            },
+            isFilterable: false,
+            isOrderable: false,
         }),
         startDate: calendarDay({
             access: {
@@ -74,6 +85,9 @@ export const Project = list({
                 { label: 'Sculptor', value: 'sculptor' },
                 { label: 'Wood Maker', value: 'wood_worker' },
             ],
+        }),
+        owner: relationship({
+            ref: 'User.projectsOwner',
         }),
         members: relationship({
             ref: 'User.projectsAssigned',

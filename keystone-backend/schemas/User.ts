@@ -3,7 +3,6 @@ import {allowAll, denyAll} from "@keystone-6/core/access";
 import {password, text, checkbox, relationship, select} from "@keystone-6/core/fields";
 import type {Session} from "../schema";
 import {skillFields} from "./Skill";
-import {ProjectSubscription} from "./ProjectSubscription";
 
 export function isAdminOrSameUser ({ session, item }: { session?: Session }) {
     // you need to have a session to do this
@@ -97,6 +96,13 @@ export const User = list({
         }),
         locations: relationship({
             ref: 'Location.assignedTo',
+        }),
+        projectsOwner: relationship({
+            ref: 'Project.owner',
+            many: true,
+            ui: {
+                itemView: { fieldMode: 'read' },
+            },
         }),
         projectsAssigned: relationship({
             ref: 'Project.members',

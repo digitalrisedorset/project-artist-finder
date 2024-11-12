@@ -2,7 +2,7 @@ import { config } from '@keystone-6/core'
 import type { TypeInfo } from '.keystone/types'
 import { withAuth } from "./auth";
 import { statelessSessions } from '@keystone-6/core/session';
-import { type Session, lists } from './schema'
+import { type Session, lists, extendGraphqlSchema } from './schema'
 import {getDatabaseConnection, getDatabaseType} from './schemas/config'
 import {keystoneconfig} from './config'
 
@@ -28,10 +28,13 @@ export default withAuth<TypeInfo<Session>>(
             url: getDatabaseConnection(),
             onConnect: async context => { /* ... */ },
             //Optional advanced configuration
-            enableLogging: true,
+            //enableLogging: true,
             idField: { kind: 'uuid' }
         },
         lists,
+        graphql: {
+            extendGraphqlSchema
+        },
         ui: {
             //isAccessAllowed: ()=> true,
             // only admins can view the AdminUI
